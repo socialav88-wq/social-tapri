@@ -13,9 +13,7 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
-                    colors: {
-                        chai: { light: '#d97706', dark: '#fbbf24' }
-                    }
+                    colors: { chai: { light: '#d97706', dark: '#fbbf24' } }
                 }
             }
         }
@@ -24,10 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        body { 
-            background-color: #f8fafc; color: #0f172a;
-            -webkit-tap-highlight-color: transparent; transition: background-color 0.3s ease, color 0.3s ease;
-        }
+        body { background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s ease, color 0.3s ease; }
         .dark body { background-color: #020617; color: #f8fafc; }
         
         .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.6); }
@@ -58,12 +53,34 @@
         .story-modal.active { opacity: 1; pointer-events: auto; }
         @keyframes storyProgress { from { width: 0%; } to { width: 100%; } }
         .story-bar-fill { animation: storyProgress 3s linear forwards; }
+
+        /* Toast Animation */
+        .toast { transform: translateY(-150%); opacity: 0; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .toast.active { transform: translateY(0); opacity: 1; }
     </style>
 </head>
 <body class="pb-32 min-h-screen">
 
+    <div id="toastNotification" class="toast fixed top-6 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-full shadow-2xl z-[500] text-[15px] font-bold flex items-center gap-2 whitespace-nowrap border border-slate-700 dark:border-slate-200">
+        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span id="toastMsg">Feature coming soon!</span>
+    </div>
+
     <div class="max-w-[480px] mx-auto min-h-screen relative shadow-[0_0_60px_rgba(0,0,0,0.05)] dark:shadow-[0_0_60px_rgba(0,0,0,0.5)] bg-[#fcfcfd] dark:bg-slate-900 transition-colors duration-300 overflow-x-hidden">
         
+        <div id="authOverlay" class="fixed inset-0 z-[300] bg-[#fcfcfd] dark:bg-slate-900 flex flex-col items-center justify-center p-6 transition-opacity duration-300">
+            <div class="w-full max-w-sm flex flex-col items-center text-center">
+                <div class="w-20 h-20 bg-orange-500 rounded-3xl flex items-center justify-center text-4xl mb-6 shadow-[0_10px_30px_rgba(249,115,22,0.4)]">☕</div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">TAPRI<span class="text-orange-500">.</span></h1>
+                <p class="text-slate-500 dark:text-slate-400 font-medium mb-12">Connect with your neighborhood.</p>
+                
+                <button onclick="signInWithGoogle()" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors active:scale-95">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    Continue with Google
+                </button>
+            </div>
+        </div>
+
         <header class="sticky top-0 z-40 glass-panel px-6 py-4 flex flex-col gap-4 shadow-sm rounded-b-3xl">
             <div class="flex justify-between items-center">
                 <div class="flex flex-col">
@@ -77,16 +94,13 @@
                     <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm">
                         <span id="themeIcon">🌙</span>
                     </button>
-                    <img id="headerAvatar" onclick="document.getElementById('nav-profile').click()" src="https://api.dicebear.com/9.x/avataaars/svg?seed=founder&backgroundColor=f8fafc" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-800 bg-slate-50 shadow-md cursor-pointer hover:scale-105 transition-transform" />
+                    <img id="headerAvatar" onclick="document.getElementById('nav-profile').click()" src="https://api.dicebear.com/9.x/avataaars/svg?seed=founder&backgroundColor=f8fafc" loading="lazy" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-800 bg-slate-50 shadow-md cursor-pointer hover:scale-105 transition-transform object-cover" />
                 </div>
             </div>
             
             <div class="relative">
                 <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 <input type="text" id="globalSearch" onkeyup="handleSearch(event)" placeholder="Search places, events, or updates..." class="w-full bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl py-3.5 pl-12 pr-4 text-[15px] focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium placeholder-slate-400 dark:text-white transition-all shadow-inner">
-                <div id="searchLoader" class="absolute right-4 top-1/2 -translate-y-1/2 hidden">
-                    <div class="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                </div>
             </div>
         </header>
 
@@ -95,40 +109,44 @@
             <div id="tab-updates" class="tab-content active space-y-6">
                 
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2 pt-2 border-b border-slate-100 dark:border-slate-800 mb-2">
-                    <div class="flex flex-col items-center gap-1.5 cursor-pointer shrink-0" onclick="document.getElementById('imageUpload').click()">
+                    <div class="flex flex-col items-center gap-1.5 cursor-pointer shrink-0" onclick="showToast('Story uploads are launching in Beta V2!')">
                         <div class="w-[68px] h-[68px] rounded-full p-[2px] bg-slate-200 dark:bg-slate-700 relative">
-                            <img id="storyMyAvatar" src="https://api.dicebear.com/9.x/avataaars/svg?seed=founder&backgroundColor=f8fafc" class="w-full h-full rounded-full border-[3px] border-[#fcfcfd] dark:border-slate-900 object-cover" />
+                            <img id="storyMyAvatar" src="https://api.dicebear.com/9.x/avataaars/svg?seed=founder&backgroundColor=f8fafc" loading="lazy" class="w-full h-full rounded-full border-[3px] border-[#fcfcfd] dark:border-slate-900 object-cover" />
                             <div class="absolute bottom-0 right-0 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center border-2 border-white dark:border-slate-900 text-xs font-bold">+</div>
                         </div>
                         <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">Add Tale</span>
                     </div>
-                    
                     <div class="flex flex-col items-center gap-1.5 cursor-pointer shrink-0" onclick="playStory('Karachi Bakery', 'Fresh batch of fruit biscuits just came out!', 'https://api.dicebear.com/9.x/notionists/svg?seed=bakery&backgroundColor=f8fafc')">
                         <div class="w-[68px] h-[68px] rounded-full p-[2.5px] bg-gradient-to-tr from-orange-400 via-rose-500 to-amber-500">
-                            <img src="https://api.dicebear.com/9.x/notionists/svg?seed=bakery&backgroundColor=f8fafc" class="w-full h-full rounded-full border-[3px] border-[#fcfcfd] dark:border-slate-900 bg-white" />
+                            <img src="https://api.dicebear.com/9.x/notionists/svg?seed=bakery&backgroundColor=f8fafc" loading="lazy" class="w-full h-full rounded-full border-[3px] border-[#fcfcfd] dark:border-slate-900 bg-white" />
                         </div>
                         <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">Karachi Bakery</span>
                     </div>
-
                     <div class="flex flex-col items-center gap-1.5 cursor-pointer shrink-0" onclick="playStory('Priya S.', 'Working from Roastery today! Beautiful weather.', 'https://api.dicebear.com/9.x/avataaars/svg?seed=priya&backgroundColor=f8fafc')">
                         <div class="w-[68px] h-[68px] rounded-full p-[2.5px] bg-gradient-to-tr from-orange-400 via-rose-500 to-amber-500">
-                            <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=priya&backgroundColor=f8fafc" class="w-full h-full rounded-full border-[3px] border-[#fcfcfd] dark:border-slate-900 bg-white" />
+                            <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=priya&backgroundColor=f8fafc" loading="lazy" class="w-full h-full rounded-full border-[3px] border-[#fcfcfd] dark:border-slate-900 bg-white" />
                         </div>
                         <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">Priya S.</span>
                     </div>
                 </div>
 
-                <div class="flex gap-6 pb-2">
-                    <button id="btnForYou" onclick="setFeedMode('foryou')" class="pb-2 border-b-[3px] border-slate-900 dark:border-white text-slate-900 dark:text-white font-extrabold text-[16px] transition-all">For You ✨</button>
-                    <button id="btnNearby" onclick="setFeedMode('nearby')" class="pb-2 border-b-[3px] border-transparent text-slate-400 font-bold text-[16px] hover:text-slate-600 transition-all">Nearby</button>
+                <div class="flex gap-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <button id="btnForYou" onclick="setFeedMode('foryou')" class="pb-2 border-b-[3px] border-slate-900 dark:border-white text-slate-900 dark:text-white font-extrabold text-[16px] transition-all">My Feed</button>
+                    <button id="btnNearby" onclick="setFeedMode('nearby')" class="pb-2 border-b-[3px] border-transparent text-slate-400 font-bold text-[16px] hover:text-slate-600 transition-all">All Nearby</button>
                 </div>
 
                 <div class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-5 rounded-[2rem] shadow-soft flex flex-col gap-4 relative overflow-hidden">
-                    <div class="flex items-start gap-3 relative z-10">
-                        <img id="postBoxAvatar" src="https://api.dicebear.com/9.x/avataaars/svg?seed=founder&backgroundColor=f8fafc" class="w-10 h-10 rounded-full border border-slate-100 dark:border-slate-600 bg-slate-50 shrink-0" />
-                        <textarea id="postInput" placeholder="What's happening in your neighborhood?" class="w-full bg-transparent p-2 text-[15px] dark:text-white focus:outline-none resize-none h-16 placeholder-slate-400 font-medium leading-relaxed"></textarea>
-                    </div>
                     
+                    <div id="uploadLoader" class="hidden absolute inset-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+                        <div class="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                        <p class="text-sm font-bold text-slate-900 dark:text-white">Connecting to Database...</p>
+                    </div>
+
+                    <div class="flex items-start gap-3 relative z-10">
+                        <img id="postBoxAvatar" src="https://api.dicebear.com/9.x/avataaars/svg?seed=founder&backgroundColor=f8fafc" loading="lazy" class="w-10 h-10 rounded-full border border-slate-100 dark:border-slate-600 bg-slate-50 shrink-0 object-cover" />
+                        <textarea id="postInput" placeholder="What's happening nearby?" class="w-full bg-transparent p-2 text-[15px] dark:text-white focus:outline-none resize-none h-16 placeholder-slate-400 font-medium leading-relaxed"></textarea>
+                    </div>
+
                     <div id="pollInputContainer" class="hidden bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-600 space-y-2 mt-2">
                         <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Create a Poll</label>
                         <input type="text" id="pollOption1" placeholder="Option 1" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-sm dark:text-white focus:outline-none focus:border-orange-400">
@@ -141,14 +159,14 @@
                         <select id="postTopic" class="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 text-slate-700 dark:text-white focus:outline-none shrink-0">
                             <option value="General">General</option>
                             <option value="Food">Food & Drink</option>
-                            <option value="Tech">Tech & Startups</option>
+                            <option value="Tech">Tech</option>
                             <option value="Events">Events</option>
                         </select>
                     </div>
 
                     <div id="imagePreviewContainer" class="hidden relative rounded-xl overflow-hidden mb-2 mt-2">
                         <img id="imagePreview" src="" class="w-full h-48 object-cover" />
-                        <button onclick="removeImage()" class="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full hover:bg-black/70 backdrop-blur-sm">
+                        <button onclick="removeImage()" class="absolute top-2 right-2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 backdrop-blur-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
@@ -156,22 +174,24 @@
                     <div class="flex justify-between items-center border-t border-slate-50 dark:border-slate-700 pt-3 relative z-10">
                         <div class="flex gap-4 items-center">
                             <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
-                            <button onclick="document.getElementById('imageUpload').click()" class="text-slate-400 hover:text-orange-500 transition-colors flex items-center gap-1 text-sm font-bold">
+                            <button onclick="document.getElementById('imageUpload').click()" class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </button>
-                            <button onclick="togglePollUI()" class="text-slate-400 hover:text-orange-500 transition-colors flex items-center gap-1 text-sm font-bold">
+                            <button onclick="showToast('Poll functionality requiring database upgrade. Coming soon!')" class="text-slate-400 hover:text-orange-500 transition-colors flex items-center gap-1 text-sm font-bold">
                                 📊 Poll
                             </button>
                             <label class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 font-bold cursor-pointer hover:text-red-500 transition-colors">
                                 <input type="checkbox" id="urgentCheck" class="w-4 h-4 rounded text-red-500 focus:ring-red-500 accent-red-500"> 🚨 Alert
                             </label>
                         </div>
-                        <button onclick="publishPost()" class="bg-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:bg-orange-600 transition-all active:scale-95">Post</button>
+                        <button onclick="publishPost()" class="bg-orange-500 text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:bg-orange-600 transition-all active:scale-95">Post Update</button>
                     </div>
                 </div>
 
                 <div id="feed" class="space-y-5">
-                    <div class="flex justify-center p-4"><div class="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>
+                    <div class="flex justify-center p-8">
+                        <div class="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
                 </div>
             </div>
 
@@ -191,8 +211,8 @@
             </div>
 
             <div id="tab-network" class="tab-content">
-                 <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Local Network</h2>
-                 <div id="networkList" class="space-y-3"></div>
+                <h2 class="text-xl font-bold mb-4 dark:text-white">Local Network</h2>
+                <div id="networkList" class="space-y-3"></div>
             </div>
 
             <div id="tab-profile" class="tab-content">
@@ -214,7 +234,7 @@
                     
                     <div class="px-6 pb-6 relative">
                         <div class="flex justify-between items-end -mt-12 mb-4">
-                            <img id="mainProfileAvatar" src="https://api.dicebear.com/9.x/avataaars/svg?seed=founder&backgroundColor=f8fafc" class="w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 bg-slate-50 shadow-md relative z-10" />
+                            <img id="mainProfileAvatar" src="" loading="lazy" class="w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 bg-slate-50 shadow-md relative z-10 object-cover" />
                             <div class="flex gap-2 mb-2">
                                 <button onclick="openModal('shareModal')" class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white p-2.5 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors shadow-sm">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
@@ -224,75 +244,74 @@
                         </div>
                         
                         <div>
-                            <h2 id="profileNameDisplay" class="text-2xl font-extrabold text-slate-900 dark:text-white">Amit Vikram</h2>
-                            <p id="profileHandleDisplay" class="text-sm font-semibold text-orange-500 mb-3">@amit_founder</p>
+                            <h2 id="profileNameDisplay" class="text-2xl font-extrabold text-slate-900 dark:text-white">User</h2>
+                            <p id="profileHandleDisplay" class="text-sm font-semibold text-orange-500 mb-3">@user</p>
                             
                             <div class="bg-orange-50 dark:bg-slate-800/50 rounded-xl p-4 mb-4 border border-orange-100 dark:border-slate-700">
                                 <div class="flex justify-between items-end mb-2">
                                     <div>
                                         <p class="text-[10px] font-extrabold text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-0.5">Local Cred</p>
-                                        <p id="credTierDisplay" class="text-sm font-black text-slate-900 dark:text-white">Tapri Regular</p>
+                                        <p id="credTierDisplay" class="text-sm font-black text-slate-900 dark:text-white">Newcomer</p>
                                     </div>
-                                    <p class="text-xs font-bold text-slate-500"><span id="credScoreDisplay" class="text-orange-500 text-base">124</span> / 200</p>
+                                    <p class="text-xs font-bold text-slate-500"><span id="credScoreDisplay" class="text-orange-500 text-base">0</span> / 200</p>
                                 </div>
                                 <div class="w-full bg-orange-200/50 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
-                                    <div id="credBar" class="bg-gradient-to-r from-orange-400 to-rose-500 h-2 rounded-full cred-fill" style="width: 62%;"></div>
+                                    <div id="credBar" class="bg-gradient-to-r from-orange-400 to-rose-500 h-2 rounded-full cred-fill" style="width: 0%;"></div>
                                 </div>
                             </div>
 
                             <div class="flex flex-wrap gap-2 mb-4">
                                 <span id="profileLocationBadge" class="bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold px-2.5 py-1 rounded-md border border-orange-200 dark:border-orange-500/20 flex items-center gap-1">📍 <span id="badgeText">Locating...</span></span>
-                                <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-600">☕ Verified Founder</span>
+                                <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-600">☕ Verified Tapri User</span>
                             </div>
 
                             <div id="displayInterests" class="flex flex-wrap gap-2 mb-4"></div>
 
-                            <p id="profileBioDisplay" class="text-[15px] font-medium text-slate-600 dark:text-slate-300 leading-relaxed mb-4">Founder of Tapri. Exploring the city's best cafes and connecting with the local community.</p>
+                            <p id="profileBioDisplay" class="text-[15px] font-medium text-slate-600 dark:text-slate-300 leading-relaxed mb-4">Connecting with the local community.</p>
                             
-                            <div class="flex gap-4 text-sm font-bold text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-700 pt-4">
+                            <div class="flex gap-4 text-sm font-bold text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-700 pt-4 pb-2">
                                 <p><span class="text-slate-900 dark:text-white font-black text-lg" id="profilePostCount">0</span> Posts</p>
-                                <p><span class="text-slate-900 dark:text-white font-black text-lg">124</span> Chais Given</p>
+                                <p><span class="text-slate-900 dark:text-white font-black text-lg" id="profileChaiCount">0</span> Chais Given</p>
                             </div>
+
+                            <button onclick="showToast('Enable Vercel Web Analytics in your dashboard for live insights!')" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex justify-center items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                View Profile Analytics
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex gap-6 border-b border-slate-200 dark:border-slate-700 mb-6">
-                    <button class="pb-3 border-b-2 border-slate-900 dark:border-white text-slate-900 dark:text-white font-bold text-[15px]">My Updates & Polls</button>
+                    <button class="pb-3 border-b-2 border-slate-900 dark:border-white text-slate-900 dark:text-white font-bold text-[15px]">My Updates</button>
                     <button class="pb-3 border-b-2 border-transparent text-slate-400 font-bold text-[15px] hover:text-slate-600">Saved</button>
                 </div>
-
+                
                 <div id="profileFeed" class="space-y-5"></div>
             </div>
         </main>
 
         <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[420px] h-[72px] glass-panel rounded-[2rem] p-2 flex justify-between items-center shadow-[0_20px_40px_rgba(0,0,0,0.08)] z-30">
-            <button onclick="switchTab('updates', this)" id="nav-updates" class="nav-btn w-14 h-14 flex flex-col items-center justify-center rounded-2xl bg-slate-900 dark:bg-orange-500 text-white shadow-md transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
-            </button>
-            <button onclick="switchTab('discover', this)" id="nav-discover" class="nav-btn w-14 h-14 flex flex-col items-center justify-center rounded-2xl text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </button>
-            <button onclick="switchTab('network', this)" id="nav-network" class="nav-btn w-14 h-14 flex flex-col items-center justify-center rounded-2xl text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-            </button>
-            <button onclick="switchTab('profile', this)" id="nav-profile" class="nav-btn w-14 h-14 flex flex-col items-center justify-center rounded-2xl text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            </button>
+            <button onclick="switchTab('updates', this)" class="nav-btn w-14 h-14 flex flex-col items-center justify-center rounded-2xl bg-slate-900 dark:bg-orange-500 text-white shadow-md transition-all"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg></button>
+            <button onclick="switchTab('discover', this)" class="nav-btn w-14 h-14 flex flex-col items-center justify-center rounded-2xl text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+            <button onclick="switchTab('network', this)" class="nav-btn w-14 h-14 flex flex-col items-center justify-center rounded-2xl text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></button>
+            <button onclick="switchTab('profile', this)" class="nav-btn w-14 h-14 flex flex-col items-center justify-center rounded-2xl text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
         </nav>
 
-        <div id="storyModal" class="story-modal fixed inset-0 flex flex-col bg-slate-900 z-[200]">
+        <div id="storyModal" onclick="closeStory()" class="story-modal fixed inset-0 flex flex-col bg-slate-900 z-[200] cursor-pointer">
             <div class="w-full px-2 pt-4 pb-2 flex gap-1 absolute top-0 z-10">
                 <div class="h-1 bg-white/30 rounded-full flex-1 overflow-hidden"><div id="storyProgressBar" class="h-full bg-white w-0"></div></div>
             </div>
             <div class="flex items-center gap-3 px-4 pt-8 absolute top-0 z-10 w-full">
                 <img id="storyModalAvatar" src="" class="w-10 h-10 rounded-full border border-white/50" />
                 <div><p id="storyModalName" class="text-[15px] font-bold text-white shadow-sm">Name</p></div>
-                <button onclick="closeStory()" class="ml-auto text-white p-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <button onclick="closeStory()" class="ml-auto text-white p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
             <div class="flex-1 flex items-center justify-center p-8 bg-gradient-to-b from-slate-800 to-slate-950 relative">
-                <h2 id="storyModalText" class="text-3xl font-black text-white text-center leading-tight tracking-tight z-10 relative">Story Content</h2>
-                <div class="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center"></div>
+                <h2 id="storyModalText" class="text-3xl font-black text-white text-center leading-tight tracking-tight z-10 relative pointer-events-none">Story Content</h2>
+                <div class="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center pointer-events-none"></div>
             </div>
         </div>
 
@@ -325,7 +344,7 @@
                             </select>
                             <div class="flex gap-3">
                                 <input type="text" id="editAvatarInput" placeholder="Type a seed word" onkeyup="previewAvatar()" onchange="previewAvatar()" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-[15px] dark:text-white font-medium">
-                                <img id="avatarPreviewBox" src="https://api.dicebear.com/9.x/avataaars/svg?seed=founder&backgroundColor=f8fafc" class="w-12 h-12 rounded-xl bg-white border border-slate-200 shrink-0 shadow-sm" />
+                                <img id="avatarPreviewBox" src="https://api.dicebear.com/9.x/avataaars/svg?seed=founder&backgroundColor=f8fafc" loading="lazy" class="w-12 h-12 rounded-xl bg-white border border-slate-200 shrink-0 shadow-sm object-cover" />
                             </div>
                         </div>
                     </div>
@@ -359,10 +378,13 @@
                     <button onclick="closeModal('settingsModal')" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
                 <div class="space-y-2 overflow-y-auto hide-scrollbar flex-1 pb-4">
-                    <button class="w-full flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"><div class="flex items-center gap-3"><span class="text-xl">🔔</span><span class="font-bold text-slate-700 dark:text-slate-200">Notifications</span></div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+                    <button onclick="showToast('Notification engine requires database upgrade. Coming soon!')" class="w-full flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <div class="flex items-center gap-3"><span class="text-xl">🔔</span><span class="font-bold text-slate-700 dark:text-slate-200">Notifications</span></div>
+                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
                 </div>
                 <div class="pt-4 border-t border-slate-100 dark:border-slate-800 shrink-0 mt-2">
-                    <button onclick="closeModal('settingsModal')" class="w-full font-bold text-red-500 py-3.5 bg-red-50 dark:bg-red-500/10 rounded-xl hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">Log Out</button>
+                    <button onclick="logOut()" class="w-full font-bold text-red-500 py-3.5 bg-red-50 dark:bg-red-500/10 rounded-xl hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">Log Out</button>
                 </div>
             </div>
         </div>
@@ -374,7 +396,7 @@
                     <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">Share Profile</h3>
                     <p class="text-sm text-slate-500 dark:text-slate-400 mb-8 font-medium">Let your neighbors find you on Tapri.</p>
                     <div class="bg-slate-50 dark:bg-slate-800 p-6 rounded-3xl mx-auto inline-block border border-slate-200 dark:border-slate-700 mb-8 shadow-inner">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://tapri.com/amit_founder" alt="QR Code" class="rounded-xl w-40 h-40 opacity-90 mix-blend-multiply dark:mix-blend-normal dark:bg-white p-2">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://social-tapri.vercel.app/" alt="QR Code" class="rounded-xl w-40 h-40 opacity-90 mix-blend-multiply dark:mix-blend-normal dark:bg-white p-2">
                     </div>
                 </div>
                 <div class="flex gap-3 shrink-0 pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
@@ -387,96 +409,303 @@
     </div>
 
     <script>
-        // --- 1. SUPABASE DATABASE SETUP ---
+        // 1. SUPABASE CONNECTION
         const supabaseUrl = 'https://vtszkowjjwkdxxgufgie.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0c3prb3dqandrZHh4Z3VmZ2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTEwNTMsImV4cCI6MjA5MjU4NzA1M30.aA9_xcw2cbzPqPU8DDgC-drwxh6VNQyAVUgmDAHnzls';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // --- 2. CORE STATE ---
+        // 2. STATE MANAGEMENT
         let myUser = { 
-            name: "Amit Vikram", 
-            handle: "@amit_founder", 
-            bio: "Founder of Tapri. Exploring the city's best cafes and connecting with the local community.", 
+            name: "Guest User", 
+            handle: "@guest", 
+            bio: "Checking out Tapri.",
             avatarStyle: "avataaars", 
-            avatarSeed: "founder", 
-            interests: ["Tech", "General"], 
-            cred: 124 
+            avatarSeed: "guest",
+            interests: ["General", "Tech", "Food", "Events"], 
+            avatarUrl: "",
+            cred: 0,
+            chaisGiven: 0
         };
         let currentLocation = "Hyderabad";
         let currentFeedMode = "foryou"; 
-        
-        let initialMockPosts = [
-            { id: 1, topic: "Food", isMe: true, author: "Amit Vikram", handle: "@amit_founder", msg: "Who serves the best Mandi in Hyderabad right now? Need suggestions.", time: "10m ago", avatarUrl: `https://api.dicebear.com/9.x/avataaars/svg?seed=founder&backgroundColor=f8fafc`, image: null, chais: 12, isUrgent: false, isPoll: true, hasVoted: false, pollOptions: [ { text: "Shah Ghouse", votes: 42 }, { text: "Barkas", votes: 38 } ] },
-            { id: 2, topic: "General", isMe: false, author: "Priya S.", handle: "@priya_design", msg: "Found a quiet spot to work from today. Incredible pour-over.", time: "1h ago", avatarUrl: `https://api.dicebear.com/9.x/avataaars/svg?seed=priya&backgroundColor=f8fafc`, image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80", chais: 24, isUrgent: false, isPoll: false },
-            { id: 3, topic: "Events", isMe: false, author: "Rahul M.", handle: "@rahul_m", msg: "Anyone going to the Sunday Soul Sante tomorrow?", time: "3h ago", avatarUrl: `https://api.dicebear.com/9.x/notionists/svg?seed=rahul&backgroundColor=f8fafc`, image: null, chais: 5, isUrgent: false, isPoll: false }
-        ];
         let posts = [];
 
-        // --- 3. FETCHING LIVE DATA FROM SUPABASE ---
+        // --- NEW: TOAST NOTIFICATION FUNCTION ---
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMsg').innerText = message;
+            
+            toast.classList.add('active');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // 3. AUTHENTICATION LOGIC
+        async function checkSession() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) { 
+                handleLoginSuccess(session.user); 
+            } else { 
+                document.getElementById('authOverlay').classList.remove('hidden'); 
+            }
+        }
+
+        _supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) { 
+                handleLoginSuccess(session.user); 
+            }
+        });
+
+        async function signInWithGoogle() { 
+            await _supabase.auth.signInWithOAuth({ provider: 'google' }); 
+        }
+
+        async function logOut() { 
+            await _supabase.auth.signOut(); 
+            window.location.reload(); 
+        }
+
+        function handleLoginSuccess(user) {
+            document.getElementById('authOverlay').classList.add('hidden');
+            
+            myUser.name = user.user_metadata.full_name || "New Neighbor";
+            myUser.handle = "@" + myUser.name.toLowerCase().replace(/\s/g, '');
+            myUser.avatarSeed = myUser.name; 
+            
+            myUser.avatarUrl = user.user_metadata.avatar_url || getAvatarUrl('avataaars', myUser.avatarSeed);
+            
+            updateProfileUI();
+            fetchLivePosts();
+        }
+
+        function updateProfileUI() {
+            document.getElementById('profileNameDisplay').innerText = myUser.name; 
+            document.getElementById('profileHandleDisplay').innerText = myUser.handle;
+            document.getElementById('profileBioDisplay').innerText = myUser.bio;
+            
+            let finalAvatar = myUser.avatarUrl || getAvatarUrl(myUser.avatarStyle, myUser.avatarSeed);
+            document.getElementById('headerAvatar').src = finalAvatar; 
+            document.getElementById('mainProfileAvatar').src = finalAvatar; 
+            document.getElementById('postBoxAvatar').src = finalAvatar; 
+            document.getElementById('storyMyAvatar').src = finalAvatar;
+            
+            document.getElementById('displayInterests').innerHTML = myUser.interests.map(i => {
+                let ic = i==="Food"?"🍔":i==="Tech"?"💻":i==="Events"?"🎸":"🏘️";
+                return `<span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-600">${ic} ${i}</span>`;
+            }).join('');
+            
+            updateCredUI();
+            document.getElementById('profileChaiCount').innerText = myUser.chaisGiven;
+        }
+
+        // 4. FETCHING LIVE POSTS
         async function fetchLivePosts() {
             try {
                 const { data, error } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
-                if (data && data.length > 0) {
-                    const dbPosts = data.map(d => ({
-                        id: d.id, topic: d.topic || 'General', isMe: d.handle === myUser.handle, author: d.author, handle: d.handle, msg: d.msg,
+                
+                if (error) {
+                    console.error("Database Error:", error.message);
+                    posts = [];
+                } else if (data) {
+                    posts = data.map(d => ({
+                        id: d.id, 
+                        topic: d.topic || 'General', 
+                        isMe: d.handle === myUser.handle, 
+                        author: d.author, 
+                        handle: d.handle, 
+                        msg: d.msg,
                         time: new Date(d.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                        avatarUrl: d.avatar_url || `https://api.dicebear.com/9.x/avataaars/svg?seed=default&backgroundColor=f8fafc`,
-                        image: null, chais: d.chais, isUrgent: d.is_urgent, isPoll: false
+                        avatarUrl: d.avatar_url || getAvatarUrl('avataaars', 'default'),
+                        image: d.image_url || null, 
+                        chais: d.chais || 0, 
+                        isUrgent: d.is_urgent,
+                        isPoll: false 
                     }));
-                    posts = [...dbPosts, ...initialMockPosts]; 
-                } else {
-                    posts = [...initialMockPosts];
                 }
-            } catch (err) { posts = [...initialMockPosts]; }
+            } catch (err) { 
+                console.error("Catch error:", err); 
+                posts = []; 
+            }
             renderFeed();
         }
 
-        // --- 4. LOCATION & THEME ---
-        function detectLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    async (pos) => {
-                        try {
-                            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
-                            const data = await res.json();
-                            currentLocation = data.address.suburb || data.address.neighbourhood || data.address.city || "Hyderabad";
-                            updateLocationUI(currentLocation);
-                        } catch(e) { updateLocationUI(currentLocation); }
-                    }, (e) => { updateLocationUI(currentLocation); }
-                );
-            } else { updateLocationUI(currentLocation); }
-        }
-        function updateLocationUI(locStr) {
-            document.getElementById('headerLocationText').innerText = locStr; 
-            document.getElementById('discoverLocationText').innerText = locStr; 
-            document.getElementById('badgeText').innerText = locStr;
+        // 5. POST DELETING
+        async function deletePost(postId) {
+            if(!confirm("Are you sure you want to delete this post permanently?")) return;
+            
+            const { error } = await _supabase.from('posts').delete().eq('id', postId);
+            if (error) { 
+                alert("Could not delete post: " + error.message); 
+                return; 
+            }
+            await fetchLivePosts(); 
         }
 
-        let isDark = false;
-        function toggleDarkMode() {
-            isDark = !isDark; 
-            document.documentElement.classList.toggle("dark", isDark); 
-            document.getElementById("themeIcon").innerText = isDark ? "☀️" : "🌙";
-        }
-        function getAvatarUrl(style, seed) { 
-            return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&backgroundColor=f8fafc`; 
+        // 6. GENERATE HTML FOR POSTS
+        function generatePostHTML(p) {
+            let msgHTML = p.msg && p.msg.trim() !== "" ? `<p class="text-[15px] font-medium text-slate-700 dark:text-slate-200 leading-relaxed">${p.msg}</p>` : "";
+            
+            let delBtn = p.isMe ? `<button onclick="deletePost(${p.id})" class="absolute top-4 right-4 bg-red-50 dark:bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white p-2 rounded-full transition-colors z-20"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : "";
+
+            return `<div class="bg-white dark:bg-slate-800 border ${p.isUrgent ? 'border-red-400 shadow-[0_0_15px_rgba(248,113,113,0.2)]' : 'border-slate-100 dark:border-slate-700'} p-5 rounded-[2rem] shadow-soft relative overflow-hidden">
+                ${p.isUrgent ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-wider z-10">🚨 Alert</div>` : ''}
+                ${delBtn}
+                <div class="flex items-center gap-3 mb-3">
+                    <img src="${p.avatarUrl}" loading="lazy" class="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 object-cover" />
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <p class="text-[15px] font-bold text-slate-900 dark:text-white">${p.author}</p>
+                            <span class="text-[9px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded uppercase tracking-wider">${p.topic}</span>
+                        </div>
+                        <p class="text-xs font-medium text-slate-400">${p.time}</p>
+                    </div>
+                </div>
+                ${msgHTML}
+                ${p.image ? `<img src="${p.image}" loading="lazy" class="w-full h-48 object-cover rounded-xl mt-3 border border-slate-100 dark:border-slate-700" />` : ''}
+                <div class="flex gap-6 border-t border-slate-50 dark:border-slate-700 pt-3 mt-4 text-slate-400">
+                    <button onclick="toggleChai(this)" class="flex items-center gap-2 text-sm font-bold transition-colors">
+                        <div class="chai-wrapper"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 3 19 3 17 21 7 21 5 3"></polyline></svg></div>
+                        <span class="chai-count">${p.chais}</span>
+                    </button>
+                </div>
+            </div>`;
         }
 
-        // --- 5. MODALS & PROFILE ---
-        let storyTimeout;
-        function playStory(name, text, avatarUrl) {
-            document.getElementById('storyModalName').innerText = name; 
-            document.getElementById('storyModalText').innerText = text; 
-            document.getElementById('storyModalAvatar').src = avatarUrl;
-            const m = document.getElementById('storyModal'); const b = document.getElementById('storyProgressBar');
-            m.classList.add('active'); b.classList.remove('story-bar-fill'); void b.offsetWidth; b.classList.add('story-bar-fill');
-            clearTimeout(storyTimeout); storyTimeout = setTimeout(() => { closeStory(); }, 3000);
+        // 7. RENDER THE FEEDS
+        function renderFeed() {
+            let f = posts;
+            
+            if (currentFeedMode === 'foryou') { 
+                f = posts.filter(p => myUser.interests.includes(p.topic) || p.isMe); 
+            }
+            
+            if (f.length === 0) { 
+                document.getElementById("feed").innerHTML = `<div class="text-center text-slate-500 font-medium py-10">No updates found.</div>`; 
+            } else { 
+                document.getElementById("feed").innerHTML = f.map(generatePostHTML).join(''); 
+            }
+            
+            let myPosts = posts.filter(p => p.isMe);
+            if (myPosts.length === 0) {
+                document.getElementById("profileFeed").innerHTML = `<div class="text-center text-slate-500 font-medium py-6">You haven't posted anything yet.</div>`;
+            } else {
+                document.getElementById("profileFeed").innerHTML = myPosts.map(generatePostHTML).join('');
+            }
+            
+            document.getElementById("profilePostCount").innerText = myPosts.length;
         }
-        function closeStory() { 
-            document.getElementById('storyModal').classList.remove('active'); 
-            clearTimeout(storyTimeout); 
+
+        function setFeedMode(m) {
+            currentFeedMode = m;
+            let fy = document.getElementById('btnForYou');
+            let nb = document.getElementById('btnNearby');
+            
+            if (m === 'foryou') {
+                fy.classList.replace('border-transparent', 'border-slate-900'); 
+                fy.classList.replace('text-slate-400', 'text-slate-900'); 
+                document.documentElement.classList.contains('dark') && fy.classList.add('dark:border-white', 'dark:text-white');
+                nb.classList.replace('border-slate-900', 'border-transparent'); 
+                nb.classList.replace('text-slate-900', 'text-slate-400'); 
+                nb.classList.remove('dark:border-white', 'dark:text-white');
+            } else {
+                nb.classList.replace('border-transparent', 'border-slate-900'); 
+                nb.classList.replace('text-slate-400', 'text-slate-900'); 
+                document.documentElement.classList.contains('dark') && nb.classList.add('dark:border-white', 'dark:text-white');
+                fy.classList.replace('border-slate-900', 'border-transparent'); 
+                fy.classList.replace('text-slate-900', 'text-slate-400'); 
+                fy.classList.remove('dark:border-white', 'dark:text-white');
+            } 
+            renderFeed();
+        }
+
+        // 8. IMAGE UPLOAD HANDLING
+        let currentImageFile = null;
+        let currentImageBlob = null;
+        
+        function handleImageSelect(e) { 
+            if (e.target.files[0]) { 
+                currentImageFile = e.target.files[0];
+                currentImageBlob = URL.createObjectURL(currentImageFile);
+                document.getElementById('imagePreview').src = currentImageBlob; 
+                document.getElementById('imagePreviewContainer').classList.remove('hidden'); 
+            } 
         }
         
+        function removeImage() { 
+            currentImageFile = null; 
+            currentImageBlob = null;
+            document.getElementById('imageUpload').value = ""; 
+            document.getElementById('imagePreviewContainer').classList.add('hidden'); 
+        }
+
+        // 9. PUBLISH POST LOGIC
+        async function publishPost() {
+            try {
+                const msg = document.getElementById("postInput").value.trim();
+                const isU = document.getElementById("urgentCheck").checked;
+                const top = document.getElementById("postTopic").value;
+                
+                if (msg === "" && !currentImageFile) {
+                    alert("Please type a message or attach a photo before posting!");
+                    return;
+                }
+
+                document.getElementById('uploadLoader').classList.remove('hidden');
+                let finalImageUrl = null;
+
+                if (currentImageFile) {
+                    const fileExt = currentImageFile.name.split('.').pop();
+                    const fileName = `${Date.now()}.${fileExt}`; 
+                    
+                    const { data, error: uploadError } = await _supabase.storage.from('tapri-images').upload(fileName, currentImageFile);
+                    
+                    if (uploadError) {
+                        alert("Image Upload Failed. Error: " + uploadError.message);
+                        document.getElementById('uploadLoader').classList.add('hidden');
+                        return;
+                    }
+                    
+                    const { data: urlData } = _supabase.storage.from('tapri-images').getPublicUrl(fileName);
+                    finalImageUrl = urlData.publicUrl;
+                }
+
+                const { error: dbError } = await _supabase.from('posts').insert([{ 
+                    author: myUser.name, 
+                    handle: myUser.handle, 
+                    topic: top, 
+                    msg: msg, 
+                    avatar_url: myUser.avatarUrl, 
+                    is_urgent: isU,
+                    image_url: finalImageUrl 
+                }]);
+
+                if (dbError) {
+                    alert("Database Save Failed. Error: " + dbError.message);
+                    document.getElementById('uploadLoader').classList.add('hidden');
+                    return;
+                }
+
+                document.getElementById('uploadLoader').classList.add('hidden');
+                document.getElementById("postInput").value = ""; 
+                document.getElementById("urgentCheck").checked = false;
+                removeImage(); 
+                
+                myUser.cred += 5; 
+                updateCredUI();
+                
+                await fetchLivePosts(); 
+
+            } catch (err) {
+                alert("An unexpected error occurred: " + err.message);
+                document.getElementById('uploadLoader').classList.add('hidden');
+            }
+        }
+
+        // 10. PROFILE MODAL FUNCTIONS
         function openModal(id) {
             if (id === 'editProfileModal') {
                 document.getElementById('editNameInput').value = myUser.name; 
@@ -497,190 +726,125 @@
         }
         
         function previewAvatar() {
-            let s = document.getElementById('editAvatarStyle').value || 'avataaars'; 
-            let w = document.getElementById('editAvatarInput').value || 'placeholder'; 
-            document.getElementById('avatarPreviewBox').src = getAvatarUrl(s, w);
+            let style = document.getElementById('editAvatarStyle').value || 'avataaars'; 
+            let seed = document.getElementById('editAvatarInput').value || 'placeholder'; 
+            document.getElementById('avatarPreviewBox').src = getAvatarUrl(style, seed);
         }
         
         function handleCoverSelect(e) {
             if (e.target.files[0]) { 
-                const u = URL.createObjectURL(e.target.files[0]); 
-                const d = document.getElementById('profileCover'); 
-                d.style.backgroundImage = `url(${u})`; 
-                d.classList.remove('bg-gradient-to-r', 'from-orange-400', 'to-rose-400'); 
+                const coverUrl = URL.createObjectURL(e.target.files[0]); 
+                const coverDiv = document.getElementById('profileCover'); 
+                coverDiv.style.backgroundImage = `url(${coverUrl})`; 
+                coverDiv.classList.remove('bg-gradient-to-r', 'from-orange-400', 'to-rose-400'); 
             }
         }
         
         function updateCredUI() {
             document.getElementById('credScoreDisplay').innerText = myUser.cred;
-            document.getElementById('credBar').style.width = `${Math.min((myUser.cred / 200) * 100, 100)}%`;
-            document.getElementById('credTierDisplay').innerText = myUser.cred > 150 ? "Local Legend" : myUser.cred > 50 ? "Tapri Regular" : "Newcomer";
+            let percent = Math.min((myUser.cred / 200) * 100, 100);
+            document.getElementById('credBar').style.width = `${percent}%`;
+            
+            let tier = "Newcomer";
+            if(myUser.cred > 50) tier = "Tapri Regular";
+            if(myUser.cred > 150) tier = "Local Legend";
+            document.getElementById('credTierDisplay').innerText = tier;
         }
         
         function saveProfile() {
             myUser.name = document.getElementById('editNameInput').value || "User";
-            let h = document.getElementById('editHandleInput').value || "user";
-            myUser.handle = h.startsWith('@') ? h : '@' + h;
+            let handleInput = document.getElementById('editHandleInput').value || "user";
+            myUser.handle = handleInput.startsWith('@') ? handleInput : '@' + handleInput;
             myUser.bio = document.getElementById('editBioInput').value;
             myUser.avatarStyle = document.getElementById('editAvatarStyle').value;
-            myUser.avatarSeed = document.getElementById('editAvatarInput').value || 'founder';
+            myUser.avatarSeed = document.getElementById('editAvatarInput').value || myUser.name;
+            
             myUser.interests = Array.from(document.querySelectorAll('.interest-check:checked')).map(box => box.value);
+            myUser.avatarUrl = getAvatarUrl(myUser.avatarStyle, myUser.avatarSeed);
             
-            document.getElementById('profileNameDisplay').innerText = myUser.name; 
-            document.getElementById('profileHandleDisplay').innerText = myUser.handle; 
-            document.getElementById('profileBioDisplay').innerText = myUser.bio;
-            
-            let n = getAvatarUrl(myUser.avatarStyle, myUser.avatarSeed);
-            document.getElementById('headerAvatar').src = n; 
-            document.getElementById('mainProfileAvatar').src = n; 
-            document.getElementById('postBoxAvatar').src = n; 
-            document.getElementById('storyMyAvatar').src = n;
-            
-            document.getElementById('displayInterests').innerHTML = myUser.interests.map(i => {
-                let ic = i==="Food"?"🍔":i==="Tech"?"💻":i==="Events"?"🎸":"🏘️";
-                return `<span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-600">${ic} ${i}</span>`;
-            }).join('');
-            
+            updateProfileUI();
             closeModal('editProfileModal'); 
             renderFeed(); 
         }
 
-        // --- 6. FEED RENDERING & POSTING ---
-        let isCreatingPoll = false;
-        function togglePollUI() {
-            isCreatingPoll = !isCreatingPoll; 
-            const c = document.getElementById('pollInputContainer');
-            if(isCreatingPoll) { 
-                c.classList.remove('hidden'); 
-            } else { 
-                c.classList.add('hidden'); 
-                document.getElementById('pollOption1').value = ''; 
-                document.getElementById('pollOption2').value = ''; 
-            }
-        }
-        
-        function setFeedMode(m) {
-            currentFeedMode = m;
-            let fy = document.getElementById('btnForYou'), nb = document.getElementById('btnNearby');
-            if(m === 'foryou') {
-                fy.classList.replace('border-transparent', 'border-slate-900'); fy.classList.replace('text-slate-400', 'text-slate-900'); document.documentElement.classList.contains('dark') && fy.classList.add('dark:border-white', 'dark:text-white');
-                nb.classList.replace('border-slate-900', 'border-transparent'); nb.classList.replace('text-slate-900', 'text-slate-400'); nb.classList.remove('dark:border-white', 'dark:text-white');
-            } else {
-                nb.classList.replace('border-transparent', 'border-slate-900'); nb.classList.replace('text-slate-400', 'text-slate-900'); document.documentElement.classList.contains('dark') && nb.classList.add('dark:border-white', 'dark:text-white');
-                fy.classList.replace('border-slate-900', 'border-transparent'); fy.classList.replace('text-slate-900', 'text-slate-400'); fy.classList.remove('dark:border-white', 'dark:text-white');
-            } 
-            renderFeed();
-        }
-
-        let currentImageBlob = null;
-        function submitPostVote(id, idx) { 
-            let p = posts.find(x => x.id === id); 
-            if(p && !p.hasVoted) { p.pollOptions[idx].votes++; p.hasVoted = true; renderFeed(); } 
-        }
-        
+        // 11. GAMIFICATION (Chai functionality)
         function toggleChai(btn) {
-            let s = btn.querySelector('.chai-count'), w = btn.querySelector('.chai-wrapper'), c = parseInt(s.innerText);
+            let countSpan = btn.querySelector('.chai-count');
+            let iconWrapper = btn.querySelector('.chai-wrapper');
+            let count = parseInt(countSpan.innerText);
+
             if (btn.classList.contains('active-chai')) {
-                btn.classList.remove('active-chai', 'text-chai-light', 'dark:text-chai-dark'); btn.classList.add('text-slate-400');
-                w.classList.remove('animate-chai'); w.innerHTML = `<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 3 19 3 17 21 7 21 5 3"></polyline></svg>`; s.innerText = c - 1;
+                btn.classList.remove('active-chai', 'text-chai-light', 'dark:text-chai-dark'); 
+                btn.classList.add('text-slate-400');
+                iconWrapper.classList.remove('animate-chai'); 
+                iconWrapper.innerHTML = `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 3 19 3 17 21 7 21 5 3"></polyline></svg>`; 
+                countSpan.innerText = count - 1;
             } else {
-                btn.classList.add('active-chai', 'text-chai-light', 'dark:text-chai-dark'); btn.classList.remove('text-slate-400');
-                w.classList.remove('animate-chai'); void w.offsetWidth; w.classList.add('animate-chai');
-                w.innerHTML = `<svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline fill="none" points="5 3 19 3 17 21 7 21 5 3"></polyline><polygon fill="currentColor" opacity="0.8" points="6 8 18 8 16.5 20 7.5 20"></polygon></svg>`; s.innerText = c + 1;
-                myUser.cred += 1; updateCredUI();
+                btn.classList.add('active-chai', 'text-chai-light', 'dark:text-chai-dark'); 
+                btn.classList.remove('text-slate-400');
+                iconWrapper.classList.remove('animate-chai'); 
+                void iconWrapper.offsetWidth; 
+                iconWrapper.classList.add('animate-chai');
+                iconWrapper.innerHTML = `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline fill="none" points="5 3 19 3 17 21 7 21 5 3"></polyline><polygon fill="currentColor" opacity="0.8" points="6 8 18 8 16.5 20 7.5 20"></polygon></svg>`; 
+                countSpan.innerText = count + 1;
+                
+                myUser.cred += 1; 
+                myUser.chaisGiven += 1;
+                updateCredUI();
+                document.getElementById('profileChaiCount').innerText = myUser.chaisGiven;
             }
         }
 
-        function generatePostHTML(p) {
-            let au = p.isMe ? myUser.name : p.author;
-            let av = p.isMe ? getAvatarUrl(myUser.avatarStyle, myUser.avatarSeed) : p.avatarUrl;
-            let ph = "";
-            if (p.isPoll) {
-                let t = p.pollOptions.reduce((s, i) => s + i.votes, 0);
-                let op = p.pollOptions.map((i, idx) => {
-                    let pc = t === 0 ? 0 : Math.round((i.votes / t) * 100);
-                    if (!p.hasVoted) return `<button onclick="submitPostVote(${p.id}, ${idx})" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl py-3 px-4 text-left font-semibold text-[15px] text-slate-700 dark:text-slate-200 hover:border-orange-400 hover:shadow-sm transition-all active:scale-[0.98] mt-2">${i.text}</button>`;
-                    let w = Math.max(...p.pollOptions.map(d => d.votes)) === i.votes;
-                    return `<div class="relative w-full bg-slate-50 dark:bg-slate-700/50 rounded-xl overflow-hidden py-3 px-4 border ${w ? 'border-orange-400' : 'border-transparent'} mt-2"><div class="absolute top-0 left-0 h-full bg-orange-200 dark:bg-orange-500/30 poll-bar" style="width: ${pc}%;"></div><div class="relative z-10 flex justify-between items-center"><span class="font-bold text-[15px] text-slate-800 dark:text-white">${i.text}</span><span class="font-bold text-[13px] ${w ? 'text-orange-600 dark:text-orange-400' : 'text-slate-500'}">${pc}%</span></div></div>`;
-                }).join('');
-                ph = `<div class="mt-3 mb-2">${op}<p class="text-xs text-slate-400 mt-2 font-medium">${t} votes</p></div>`;
-            }
-            return `<div class="bg-white dark:bg-slate-800 border ${p.isUrgent ? 'border-red-400 shadow-[0_0_15px_rgba(248,113,113,0.2)]' : 'border-slate-100 dark:border-slate-700'} p-5 rounded-[2rem] shadow-soft relative overflow-hidden">
-                ${p.isUrgent ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-wider">🚨 Alert</div>` : ''}
-                <div class="flex items-center gap-3 mb-3"><img src="${av}" class="w-10 h-10 rounded-full bg-slate-50 border border-slate-100" /><div><div class="flex items-center gap-2"><p class="text-[15px] font-bold text-slate-900 dark:text-white">${au}</p><span class="text-[9px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded uppercase tracking-wider">${p.topic}</span></div><p class="text-xs font-medium text-slate-400">${p.time}</p></div></div>
-                <p class="text-[15px] font-medium text-slate-700 dark:text-slate-200 leading-relaxed">${p.msg}</p>${ph}${p.image ? `<img src="${p.image}" class="w-full h-48 object-cover rounded-xl mt-3 border border-slate-100 dark:border-slate-700" />` : ''}
-                <div class="flex gap-6 border-t border-slate-50 dark:border-slate-700 pt-3 mt-4 text-slate-400"><button onclick="toggleChai(this)" class="flex items-center gap-2 text-sm font-bold transition-colors"><div class="chai-wrapper"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 3 19 3 17 21 7 21 5 3"></polyline></svg></div><span class="chai-count">${p.chais}</span></button></div>
-            </div>`;
-        }
-
-        function renderFeed() {
-            let f = posts;
-            if(currentFeedMode === 'foryou') { 
-                f = posts.filter(p => myUser.interests.includes(p.topic) || p.isMe); 
-                if(f.length === 0) f = posts; 
-            }
-            document.getElementById("feed").innerHTML = f.map(generatePostHTML).join('');
-            document.getElementById("profileFeed").innerHTML = posts.filter(p => p.isMe).map(generatePostHTML).join('');
-            document.getElementById("profilePostCount").innerText = posts.filter(p => p.isMe).length;
-        }
-
-        function handleImageSelect(e) { 
-            if (e.target.files[0]) { 
-                currentImageBlob = URL.createObjectURL(e.target.files[0]); 
-                document.getElementById('imagePreview').src = currentImageBlob; 
-                document.getElementById('imagePreviewContainer').classList.remove('hidden'); 
-                if(isCreatingPoll) togglePollUI(); 
-            } 
+        // 12. STORIES LOGIC (Tapri Tales)
+        let storyTimeout;
+        function playStory(name, text, avatarUrl) {
+            // Stop propagation to prevent immediate closure if clicked from a child element
+            if(event) event.stopPropagation();
+            
+            document.getElementById('storyModalName').innerText = name; 
+            document.getElementById('storyModalText').innerText = text; 
+            document.getElementById('storyModalAvatar').src = avatarUrl;
+            
+            const modal = document.getElementById('storyModal'); 
+            const bar = document.getElementById('storyProgressBar');
+            
+            modal.classList.add('active'); 
+            bar.classList.remove('story-bar-fill'); 
+            void bar.offsetWidth; 
+            bar.classList.add('story-bar-fill');
+            
+            clearTimeout(storyTimeout); 
+            storyTimeout = setTimeout(() => { closeStory(); }, 3000);
         }
         
-        function removeImage() { 
-            currentImageBlob = null; 
-            document.getElementById('imageUpload').value = ""; 
-            document.getElementById('imagePreviewContainer').classList.add('hidden'); 
+        function closeStory() { 
+            document.getElementById('storyModal').classList.remove('active'); 
+            clearTimeout(storyTimeout); 
         }
 
-        // LIVE SUPABASE PUSH!
-        async function publishPost() {
-            const msg = document.getElementById("postInput").value.trim();
-            const isU = document.getElementById("urgentCheck").checked;
-            const top = document.getElementById("postTopic").value;
+        // 13. UI UTILS & THEME
+        function switchTab(id, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); 
+            document.getElementById('tab-' + id).classList.add('active');
             
-            let pO = []; 
-            if (isCreatingPoll) { 
-                let o1 = document.getElementById('pollOption1').value.trim();
-                let o2 = document.getElementById('pollOption2').value.trim();
-                if (o1 && o2) pO = [{text: o1, votes: 0}, {text: o2, votes: 0}]; 
-            }
-            
-            if (msg === "" && !currentImageBlob && pO.length === 0) return;
-
-            // Optimistic update locally
-            posts.unshift({ 
-                id: Date.now(), isMe: true, author: myUser.name, handle: myUser.handle, topic: top, 
-                msg: msg, time: "Just now", avatarUrl: getAvatarUrl(myUser.avatarStyle, myUser.avatarSeed), 
-                image: currentImageBlob, chais: 0, isUrgent: isU, isPoll: pO.length > 0, hasVoted: false, pollOptions: pO 
+            document.querySelectorAll('.nav-btn').forEach(b => { 
+                b.classList.remove('bg-slate-900', 'dark:bg-orange-500', 'text-white', 'shadow-md'); 
+                b.classList.add('text-slate-400'); 
             });
-            
-            myUser.cred += 5; updateCredUI();
-            
-            document.getElementById("postInput").value = ""; 
-            document.getElementById("urgentCheck").checked = false;
-            
-            if(isCreatingPoll) togglePollUI(); 
-            removeImage(); renderFeed();
-
-            // Push to Supabase!
-            await _supabase.from('posts').insert([{ 
-                author: myUser.name, 
-                handle: myUser.handle, 
-                topic: top, 
-                msg: msg, 
-                avatar_url: getAvatarUrl(myUser.avatarStyle, myUser.avatarSeed), 
-                is_urgent: isU 
-            }]);
+            btn.classList.remove('text-slate-400'); 
+            btn.classList.add('bg-slate-900', 'dark:bg-orange-500', 'text-white', 'shadow-md');
         }
 
-        // --- 7. DISCOVER & NETWORK ---
+        let isDark = false;
+        function toggleDarkMode() { 
+            isDark = !isDark; 
+            document.documentElement.classList.toggle("dark", isDark); 
+            document.getElementById("themeIcon").innerText = isDark ? "☀️" : "🌙"; 
+        }
+
+        function getAvatarUrl(style, seed) { return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&backgroundColor=f8fafc`; }
+
+        // --- DISCOVER & NETWORK (Static Data for MVP) ---
         let localDir = [ 
             { type: "Food", name: "Roastery Coffee House", location: "Banjara Hills", rating: "4.8", tags: "Cafe • Premium" }, 
             { type: "Event", name: "Sunday Soul Sante", location: "Hitex Center", rating: "Hot", tags: "Flea Market • Art" }, 
@@ -706,7 +870,8 @@
                 document.getElementById('discoverPosts').innerHTML = ""; 
             } else if (cat === 'Post') { 
                 document.getElementById('directoryList').innerHTML = ""; 
-                document.getElementById('discoverPosts').innerHTML = '<h3 class="font-bold text-slate-900 dark:text-white mb-2">Latest Updates</h3>' + posts.map(generatePostHTML).join(''); 
+                let dPosts = posts.length > 0 ? posts.map(generatePostHTML).join('') : '<p class="text-slate-500 text-sm">No updates available.</p>';
+                document.getElementById('discoverPosts').innerHTML = '<h3 class="font-bold text-slate-900 dark:text-white mb-2">Latest Updates</h3>' + dPosts; 
             } else { 
                 renderDirectory(localDir.filter(i => i.type === cat || i.tags.includes(cat))); 
                 document.getElementById('discoverPosts').innerHTML = ""; 
@@ -719,62 +884,51 @@
             if (q.length === 0) { renderDirectory(localDir); document.getElementById("discoverPosts").innerHTML = ""; return; }
             
             renderDirectory(localDir.filter(i => i.name.toLowerCase().includes(q) || i.tags.toLowerCase().includes(q) || i.location.toLowerCase().includes(q)));
-            
             let fp = posts.filter(p => p.msg.toLowerCase().includes(q) || p.author.toLowerCase().includes(q) || p.topic.toLowerCase().includes(q));
             document.getElementById("discoverPosts").innerHTML = fp.length > 0 ? '<h3 class="font-bold text-slate-900 dark:text-white mt-4 mb-2">Relevant Updates</h3>' + fp.map(generatePostHTML).join('') : "";
         }
-        
-        function switchTab(id, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); 
-            document.getElementById('tab-' + id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => { 
-                b.classList.remove('bg-slate-900', 'dark:bg-orange-500', 'text-white', 'shadow-md'); 
-                b.classList.add('text-slate-400'); 
-            });
-            btn.classList.remove('text-slate-400'); 
-            btn.classList.add('bg-slate-900', 'dark:bg-orange-500', 'text-white', 'shadow-md');
-        }
-        
+
         function toggleConnect(btn) {
             if(btn.innerText === "Connect") { 
                 btn.innerText = "Pending"; 
                 btn.classList.replace('bg-slate-900', 'bg-slate-200'); 
                 btn.classList.replace('text-white', 'text-slate-600'); 
-                if(document.documentElement.classList.contains('dark')){
-                    btn.classList.replace('dark:bg-white', 'dark:bg-slate-700'); 
-                    btn.classList.replace('dark:text-slate-900', 'dark:text-white');
-                } 
+                if(document.documentElement.classList.contains('dark')){btn.classList.replace('dark:bg-white', 'dark:bg-slate-700'); btn.classList.replace('dark:text-slate-900', 'dark:text-white');} 
             } else { 
                 btn.innerText = "Connect"; 
                 btn.classList.replace('bg-slate-200', 'bg-slate-900'); 
                 btn.classList.replace('text-slate-600', 'text-white'); 
-                if(document.documentElement.classList.contains('dark')){
-                    btn.classList.replace('dark:bg-slate-700', 'dark:bg-white'); 
-                    btn.classList.replace('dark:text-white', 'dark:text-slate-900');
-                } 
+                if(document.documentElement.classList.contains('dark')){btn.classList.replace('dark:bg-slate-700', 'dark:bg-white'); btn.classList.replace('dark:text-white', 'dark:text-slate-900');} 
             }
         }
-        
+
         function renderNetwork() {
             let n = [ { name: "Sneha Reddy", focus: "UI/UX Designer", avatar: "sneha" }, { name: "Karan T.", focus: "Angel Investor", avatar: "karan" } ];
-            document.getElementById("networkList").innerHTML = n.map(p => `<div class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl shadow-sm flex items-center justify-between"><div class="flex items-center gap-3"><img src="${getAvatarUrl('avataaars', p.avatar)}" class="w-12 h-12 rounded-full border border-slate-100" /><div><h3 class="font-bold text-slate-900 dark:text-white text-[15px]">${p.name}</h3><p class="text-xs text-orange-500 font-bold">${p.focus}</p></div></div><button onclick="toggleConnect(this)" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold px-4 py-2 rounded-xl text-sm transition-colors">Connect</button></div>`).join('');
+            document.getElementById("networkList").innerHTML = n.map(p => `<div class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl shadow-sm flex items-center justify-between"><div class="flex items-center gap-3"><img src="${getAvatarUrl('avataaars', p.avatar)}" loading="lazy" class="w-12 h-12 rounded-full border border-slate-100" /><div><h3 class="font-bold text-slate-900 dark:text-white text-[15px]">${p.name}</h3><p class="text-xs text-orange-500 font-bold">${p.focus}</p></div></div><button onclick="toggleConnect(this)" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold px-4 py-2 rounded-xl text-sm transition-colors">Connect</button></div>`).join('');
         }
 
-        // --- Initialize App ---
+        function detectLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                        try {
+                            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                            const data = await res.json();
+                            currentLocation = data.address.suburb || data.address.neighbourhood || data.address.city || "Hyderabad";
+                            document.getElementById('headerLocationText').innerText = currentLocation; 
+                            document.getElementById('discoverLocationText').innerText = currentLocation; 
+                            document.getElementById('badgeText').innerText = currentLocation;
+                        } catch(e) { }
+                    }, (e) => { }
+                );
+            }
+        }
+
+        // --- INITALIZE APP ---
         detectLocation();
-        fetchLivePosts(); // PULLS FROM SUPABASE IMMEDIATELY!
         renderDirectory(localDir);
         renderNetwork();
-        updateCredUI();
-        
-        document.getElementById('displayInterests').innerHTML = myUser.interests.map(i => `<span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-600">${i==="Food"?"🍔":i==="Tech"?"💻":i==="Events"?"🎸":"🏘️"} ${i}</span>`).join('');
-        
-        let iA = getAvatarUrl(myUser.avatarStyle, myUser.avatarSeed); 
-        document.getElementById('headerAvatar').src = iA; 
-        document.getElementById('mainProfileAvatar').src = iA; 
-        document.getElementById('postBoxAvatar').src = iA; 
-        document.getElementById('storyMyAvatar').src = iA; 
-        document.getElementById('avatarPreviewBox').src = iA;
+        checkSession(); 
     </script>
 </body>
 </html>
